@@ -1,10 +1,12 @@
 "# bootcamp"
 
-## Quick Start
-
-Make sure you have all requirements installed on your computer. Then, you may start the server using either a [Docker container](#run-using-docker) or in your [local machine](#run-local).
-
 ### Run using Docker
+
+Package the project:
+
+```bash
+mvn package
+```
 
 Build a docker image:
 
