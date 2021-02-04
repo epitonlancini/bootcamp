@@ -15,6 +15,6 @@ public class BreweryRateController {
 
     @PostMapping
     public void rateBrewery(@RequestBody RateBreweryRequest request) {
-
+        breweryService.rateBrewery(request);
     }
 }
