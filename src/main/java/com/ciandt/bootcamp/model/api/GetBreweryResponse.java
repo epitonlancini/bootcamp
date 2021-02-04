@@ -3,6 +3,7 @@ package com.ciandt.bootcamp.model.api;
 import lombok.*;
 
 @Data
+@Builder
 public class GetBreweryResponse {
 
     private Long id;
@@ -26,8 +27,6 @@ public class GetBreweryResponse {
     private String websiteUrl;
 
     private Integer mediumRate;
-
-
 
 
 }

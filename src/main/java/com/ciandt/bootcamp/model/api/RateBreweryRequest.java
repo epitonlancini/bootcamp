@@ -16,4 +16,6 @@ public class RateBreweryRequest {
 
     private Integer rate;
 
+
+
 }
