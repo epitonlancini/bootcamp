@@ -12,6 +12,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -38,6 +40,7 @@ public class BreweryService {
 
             ModelMapper modelMapper = new ModelMapper();
 
+
             result = openBreweryResponseList.stream().map(brewery -> modelMapper.map(brewery, GetBreweryResponse.class)).collect(Collectors.toList());
 
             //TODO: get medium rate
@@ -46,19 +49,22 @@ public class BreweryService {
         return result;
     }
 
-    public void rateBrewery(RateBreweryRequest rateBreweryRequest) {
+    public ResponseEntity<String> rateBrewery(RateBreweryRequest rateBreweryRequest) {
+        int rate = rateBreweryRequest.getRate();
+        if (rate < 0 || rate > 5) {
+            return new ResponseEntity<>("Rate need to be between 0 and 5", HttpStatus.BAD_REQUEST);
+        }
 
         Query query = new Query();
-        query.addCriteria(Criteria
-                .where("breweryId").is(rateBreweryRequest.getBreweryId())
-                .and("email").is(rateBreweryRequest.getEmail()));
+        query.addCriteria(Criteria.where("breweryId").is(rateBreweryRequest.getBreweryId()).and("email")
+                .is(rateBreweryRequest.getEmail()));
 
         Update update = new Update();
         update.set("rate", rateBreweryRequest.getRate());
 
         mongoTemplate.upsert(query, update, BreweryRate.class);
 
+        return new ResponseEntity<>(null, HttpStatus.OK);
     }
-
 
 }

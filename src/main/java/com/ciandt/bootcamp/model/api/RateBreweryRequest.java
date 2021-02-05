@@ -8,14 +8,13 @@ import javax.validation.constraints.NotNull;
 @Data
 public class RateBreweryRequest {
 
-    @NotNull
+    @NotNull(message = "Brewery id is required")
     private Long breweryId;
 
-    @NotEmpty
+    @NotEmpty(message = "Email is required")
     private String email;
 
+    @NotNull(message = "Rate is required")
     private Integer rate;
-
-
 
 }
