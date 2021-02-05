@@ -1,15 +1,18 @@
-package com.ciandt.bootcamp.model.api;
+package com.ciandt.bootcamp.integration.dto;
 
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class GetBreweryResponse {
+public class OpenBreweryResponse {
 
     private Long id;
 
     private String name;
 
+    @JsonProperty("brewery_type")
     private String breweryType;
 
     private String street;
@@ -24,9 +27,7 @@ public class GetBreweryResponse {
 
     private String latitude;
 
+    @JsonProperty("website_url")
     private String websiteUrl;
-
-    private Integer mediumRate;
-
 
 }

@@ -3,7 +3,10 @@ package com.ciandt.bootcamp.service;
 import com.ciandt.bootcamp.model.api.GetBreweryResponse;
 import com.ciandt.bootcamp.model.api.RateBreweryRequest;
 import com.ciandt.bootcamp.model.entity.BreweryRate;
+import com.ciandt.bootcamp.integration.dto.OpenBreweryResponse;
+import com.ciandt.bootcamp.integration.service.OpenBreweryService;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -11,8 +14,9 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -21,16 +25,28 @@ public class BreweryService {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    public List<GetBreweryResponse> findAll(){
+    @Autowired
+    private OpenBreweryService openBreweryService;
 
-        List<GetBreweryResponse> teste = new ArrayList<>();
+    public List<GetBreweryResponse> findAll() {
 
-        teste.add(GetBreweryResponse.builder().id(1l).build());
+        List<GetBreweryResponse> result = Collections.emptyList();
 
-        return teste;
+        List<OpenBreweryResponse> openBreweryResponseList = openBreweryService.getAll();
+
+        if (openBreweryResponseList != null) {
+
+            ModelMapper modelMapper = new ModelMapper();
+
+            result = openBreweryResponseList.stream().map(brewery -> modelMapper.map(brewery, GetBreweryResponse.class)).collect(Collectors.toList());
+
+            //TODO: get medium rate
+        }
+
+        return result;
     }
 
-    public void rateBrewery(RateBreweryRequest rateBreweryRequest){
+    public void rateBrewery(RateBreweryRequest rateBreweryRequest) {
 
         Query query = new Query();
         query.addCriteria(Criteria
