@@ -1,18 +1,26 @@
 package com.ciandt.bootcamp.service;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.ciandt.bootcamp.integration.dto.OpenBreweryResponse;
+import com.ciandt.bootcamp.integration.service.OpenBreweryService;
 import com.ciandt.bootcamp.model.api.GetBreweryResponse;
 import com.ciandt.bootcamp.model.api.RateBreweryRequest;
 import com.ciandt.bootcamp.model.entity.BreweryRate;
-import com.ciandt.bootcamp.integration.dto.OpenBreweryResponse;
-import com.ciandt.bootcamp.integration.service.OpenBreweryService;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.*;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.GroupOperation;
+import org.springframework.data.mongodb.core.aggregation.MatchOperation;
+import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -20,9 +28,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
@@ -48,14 +56,11 @@ public class BreweryService {
                     .collect(Collectors.toList());
 
             if (result != null) {
-                List<AverageRate> averageRateList = calculateAverageRate(
+                Map<Long, Double> averageRateMap = calculateAverageRate(
                         result.stream().map(GetBreweryResponse::getId).collect(Collectors.toList()));
                 for (GetBreweryResponse r : result) {
-                    averageRateList.stream().forEach(ar -> {
-                        if (r.getId() == ar.getBreweryId()) {
-                            r.setMediumRate(ar.getRateAvg());
-                        }
-                    });
+                    Double averageRateValue = averageRateMap.get(r.getId());
+                    r.setMediumRate(averageRateValue);
                 }
             }
         }
@@ -87,7 +92,7 @@ public class BreweryService {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
-    private List<AverageRate> calculateAverageRate(List<Long> breweryIdList) {
+    private Map<Long, Double> calculateAverageRate(List<Long> breweryIdList) {
 
         MatchOperation matchStage = Aggregation.match(new Criteria("breweryId").in(breweryIdList));
 
@@ -100,7 +105,15 @@ public class BreweryService {
         AggregationResults<AverageRate> output = mongoTemplate.aggregate(aggregation, BreweryRate.class,
                 AverageRate.class);
 
-        return output.getMappedResults();
+        List<AverageRate> averageRateList = output.getMappedResults();
+
+        Map<Long, Double> averageRateMap = new HashMap<>();
+
+        for (AverageRate rate : averageRateList) {
+            averageRateMap.put(rate.getBreweryId(), rate.getRateAvg());
+        }
+
+        return averageRateMap;
     }
 
     @Data
