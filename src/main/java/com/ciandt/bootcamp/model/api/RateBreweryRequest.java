@@ -2,6 +2,7 @@ package com.ciandt.bootcamp.model.api;
 
 import lombok.Data;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -16,6 +17,7 @@ public class RateBreweryRequest {
 
     @Schema(description = "User email.", example = "teste@email.com", required = true)
     @NotEmpty(message = "Email is required")
+    @Email
     private String email;
 
     @Schema(description = "Brewery rate.", example = "4", required = true)
