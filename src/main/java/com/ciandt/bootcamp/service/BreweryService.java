@@ -5,13 +5,12 @@ import com.ciandt.bootcamp.model.api.RateBreweryRequest;
 import com.ciandt.bootcamp.model.entity.BreweryRate;
 import com.ciandt.bootcamp.integration.dto.OpenBreweryResponse;
 import com.ciandt.bootcamp.integration.service.OpenBreweryService;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -45,19 +44,20 @@ public class BreweryService {
 
             ModelMapper modelMapper = new ModelMapper();
 
-
-            result = openBreweryResponseList.stream().map(brewery -> modelMapper.map(brewery, GetBreweryResponse.class)).collect(Collectors.toList());
-
-            //TODO: get medium rate
+            result = openBreweryResponseList.stream().map(brewery -> modelMapper.map(brewery, GetBreweryResponse.class))
+                    .collect(Collectors.toList());
 
             if (result != null) {
-
-                calculateAverageRate(result.stream().map(GetBreweryResponse::getId).collect(Collectors.toList()));
-
-
+                List<AverageRate> averageRateList = calculateAverageRate(
+                        result.stream().map(GetBreweryResponse::getId).collect(Collectors.toList()));
+                for (GetBreweryResponse r : result) {
+                    averageRateList.stream().forEach(ar -> {
+                        if (r.getId() == ar.getBreweryId()) {
+                            r.setMediumRate(ar.getRateAvg());
+                        }
+                    });
+                }
             }
-
-
         }
 
         return result;
@@ -81,9 +81,7 @@ public class BreweryService {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
-    private List<AverageRate>  calculateAverageRate(List<Long> breweryIdList) {
-
-        log.info("Calculate average");
+    private List<AverageRate> calculateAverageRate(List<Long> breweryIdList) {
 
         MatchOperation matchStage = Aggregation.match(new Criteria("breweryId").in(breweryIdList));
 
@@ -91,23 +89,18 @@ public class BreweryService {
 
         ProjectionOperation projectStage = Aggregation.project("breweryId", "rateAvg");
 
-        Aggregation aggregation
-                = Aggregation.newAggregation(matchStage, groupOperation, projectStage);
+        Aggregation aggregation = Aggregation.newAggregation(matchStage, groupOperation, projectStage);
 
-        AggregationResults<AverageRate> output
-                = mongoTemplate.aggregate(aggregation, "breweryRate", AverageRate.class);
+        AggregationResults<AverageRate> output = mongoTemplate.aggregate(aggregation, BreweryRate.class,
+                AverageRate.class);
 
         List<AverageRate> averageRateList = output.getMappedResults();
-
         if (averageRateList != null) {
             log.info("averageRateList {}", averageRateList.size());
-
             averageRateList.stream().forEach(a -> {
-
                 log.info("AVERAGE {} - {}", a.getBreweryId(), a.getRateAvg());
             });
         }
-
         return averageRateList;
     }
 
@@ -115,9 +108,10 @@ public class BreweryService {
     @NoArgsConstructor
     private static class AverageRate {
 
+        @Id
         private Long breweryId;
 
-        private Integer rateAvg;
+        private Double rateAvg;
 
     }
 

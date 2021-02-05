@@ -26,7 +26,7 @@ public class GetBreweryResponse {
 
     private String websiteUrl;
 
-    private Integer mediumRate;
+    private Double mediumRate;
 
 
 }
