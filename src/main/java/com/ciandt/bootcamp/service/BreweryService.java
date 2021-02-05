@@ -94,14 +94,7 @@ public class BreweryService {
         AggregationResults<AverageRate> output = mongoTemplate.aggregate(aggregation, BreweryRate.class,
                 AverageRate.class);
 
-        List<AverageRate> averageRateList = output.getMappedResults();
-        if (averageRateList != null) {
-            log.info("averageRateList {}", averageRateList.size());
-            averageRateList.stream().forEach(a -> {
-                log.info("AVERAGE {} - {}", a.getBreweryId(), a.getRateAvg());
-            });
-        }
-        return averageRateList;
+        return output.getMappedResults();
     }
 
     @Data
