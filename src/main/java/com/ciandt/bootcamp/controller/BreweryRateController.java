@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
@@ -21,7 +23,9 @@ public class BreweryRateController {
   private BreweryService breweryService;
 
   @Operation(summary = "Save the brewery rate")
-  @PostMapping("/breweryRate")
+  @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Brewery rate created or updated"),
+      @ApiResponse(responseCode = "400", description = "Invalid input") })
+  @PostMapping(value = "/breweryRate", produces = { "application/json" })
   public ResponseEntity<String> rateBrewery(@Valid @RequestBody RateBreweryRequest request) {
     return breweryService.rateBrewery(request);
   }
