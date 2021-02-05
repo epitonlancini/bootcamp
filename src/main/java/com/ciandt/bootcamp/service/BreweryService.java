@@ -5,10 +5,15 @@ import com.ciandt.bootcamp.model.api.RateBreweryRequest;
 import com.ciandt.bootcamp.model.entity.BreweryRate;
 import com.ciandt.bootcamp.integration.dto.OpenBreweryResponse;
 import com.ciandt.bootcamp.integration.service.OpenBreweryService;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.*;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
@@ -44,6 +49,15 @@ public class BreweryService {
             result = openBreweryResponseList.stream().map(brewery -> modelMapper.map(brewery, GetBreweryResponse.class)).collect(Collectors.toList());
 
             //TODO: get medium rate
+
+            if (result != null) {
+
+                calculateAverageRate(result.stream().map(GetBreweryResponse::getId).collect(Collectors.toList()));
+
+
+            }
+
+
         }
 
         return result;
@@ -65,6 +79,46 @@ public class BreweryService {
         mongoTemplate.upsert(query, update, BreweryRate.class);
 
         return new ResponseEntity<>(null, HttpStatus.OK);
+    }
+
+    private List<AverageRate>  calculateAverageRate(List<Long> breweryIdList) {
+
+        log.info("Calculate average");
+
+        MatchOperation matchStage = Aggregation.match(new Criteria("breweryId").in(breweryIdList));
+
+        GroupOperation groupOperation = Aggregation.group("breweryId").avg("rate").as("rateAvg");
+
+        ProjectionOperation projectStage = Aggregation.project("breweryId", "rateAvg");
+
+        Aggregation aggregation
+                = Aggregation.newAggregation(matchStage, groupOperation, projectStage);
+
+        AggregationResults<AverageRate> output
+                = mongoTemplate.aggregate(aggregation, "breweryRate", AverageRate.class);
+
+        List<AverageRate> averageRateList = output.getMappedResults();
+
+        if (averageRateList != null) {
+            log.info("averageRateList {}", averageRateList.size());
+
+            averageRateList.stream().forEach(a -> {
+
+                log.info("AVERAGE {} - {}", a.getBreweryId(), a.getRateAvg());
+            });
+        }
+
+        return averageRateList;
+    }
+
+    @Data
+    @NoArgsConstructor
+    private static class AverageRate {
+
+        private Long breweryId;
+
+        private Integer rateAvg;
+
     }
 
 }
