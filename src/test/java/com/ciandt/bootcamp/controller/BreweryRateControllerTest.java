@@ -3,6 +3,12 @@ package com.ciandt.bootcamp.controller;
 import com.ciandt.bootcamp.model.api.RateBreweryRequest;
 import com.ciandt.bootcamp.service.BreweryService;
 import com.google.gson.Gson;
+import org.jeasy.random.EasyRandom;
+import org.jeasy.random.EasyRandomParameters;
+import org.jeasy.random.FieldPredicates;
+import org.jeasy.random.randomizers.EmailRandomizer;
+import org.jeasy.random.randomizers.number.IntegerRandomizer;
+import org.jeasy.random.randomizers.range.IntegerRangeRandomizer;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -38,10 +44,15 @@ public class BreweryRateControllerTest {
     @Test
     public void firstTest() throws Exception{
 
-        RateBreweryRequest request = new RateBreweryRequest();
-        request.setBreweryId(1L);
-        request.setEmail("aaaaa");
-        request.setRate(1);
+        EasyRandomParameters parameters = new EasyRandomParameters();
+
+        parameters.randomize(FieldPredicates.named("rate")
+                .and(FieldPredicates.inClass(RateBreweryRequest.class)), new IntegerRangeRandomizer(1,5));
+        parameters.randomize(FieldPredicates.named("email")
+                .and(FieldPredicates.inClass(RateBreweryRequest.class)), new EmailRandomizer());
+        EasyRandom easyRandom = new EasyRandom(parameters);
+
+        RateBreweryRequest request = easyRandom.nextObject(RateBreweryRequest.class);
 
         Mockito.when(breweryService.rateBrewery(request)).thenReturn(ResponseEntity.ok(null));
 
