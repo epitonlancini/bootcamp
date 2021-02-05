@@ -9,6 +9,8 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
@@ -21,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ContextConfiguration(classes = {com.ciandt.bootcamp.service.BreweryService.class})
 @WebMvcTest(BreweryRateController.class)
+@Import(BreweryRateController.class)
 public class BreweryRateControllerTest {
 
     @Autowired
@@ -29,13 +32,16 @@ public class BreweryRateControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockBean
     private BreweryService breweryService;
 
     @Test
     public void firstTest() throws Exception{
 
         RateBreweryRequest request = new RateBreweryRequest();
+        request.setBreweryId(1L);
+        request.setEmail("aaaaa");
+        request.setRate(1);
 
         Mockito.when(breweryService.rateBrewery(request)).thenReturn(ResponseEntity.ok(null));
 
