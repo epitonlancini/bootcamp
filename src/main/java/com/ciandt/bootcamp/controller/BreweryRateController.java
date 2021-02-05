@@ -24,7 +24,8 @@ public class BreweryRateController {
 
   @Operation(summary = "Save the brewery rate")
   @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Brewery rate created or updated"),
-      @ApiResponse(responseCode = "400", description = "Invalid input") })
+      @ApiResponse(responseCode = "400", description = "Invalid input"),
+      @ApiResponse(responseCode = "404", description = "Brewery not found") })
   @PostMapping(value = "/breweryRate", produces = { "application/json" })
   public ResponseEntity<String> rateBrewery(@Valid @RequestBody RateBreweryRequest request) {
     return breweryService.rateBrewery(request);

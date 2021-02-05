@@ -64,6 +64,12 @@ public class BreweryService {
     }
 
     public ResponseEntity<String> rateBrewery(RateBreweryRequest rateBreweryRequest) {
+
+        OpenBreweryResponse openBreweryResponse = openBreweryService.getById(rateBreweryRequest.getBreweryId());
+        if (openBreweryResponse == null) {
+            return new ResponseEntity<>("Brewery not found", HttpStatus.NOT_FOUND);
+        }
+
         int rate = rateBreweryRequest.getRate();
         if (rate < 0 || rate > 5) {
             return new ResponseEntity<>("Rate need to be between 0 and 5", HttpStatus.BAD_REQUEST);
