@@ -92,7 +92,7 @@ public class BreweryService {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
-    private Map<Long, Double> calculateAverageRate(List<Long> breweryIdList) {
+    public Map<Long, Double> calculateAverageRate(List<Long> breweryIdList) {
 
         MatchOperation matchStage = Aggregation.match(new Criteria("breweryId").in(breweryIdList));
 
