@@ -42,7 +42,7 @@ public class BreweryRateControllerTest {
     private BreweryService breweryService;
 
     @Test
-    public void firstTest() throws Exception{
+    public void shouldSuccess() throws Exception{
 
         EasyRandomParameters parameters = new EasyRandomParameters();
 
@@ -50,6 +50,7 @@ public class BreweryRateControllerTest {
                 .and(FieldPredicates.inClass(RateBreweryRequest.class)), new IntegerRangeRandomizer(1,5));
         parameters.randomize(FieldPredicates.named("email")
                 .and(FieldPredicates.inClass(RateBreweryRequest.class)), new EmailRandomizer());
+
         EasyRandom easyRandom = new EasyRandom(parameters);
 
         RateBreweryRequest request = easyRandom.nextObject(RateBreweryRequest.class);
@@ -65,6 +66,20 @@ public class BreweryRateControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void shouldFailInvalidEmail() throws Exception{
+
+    }
+
+    @Test
+    public void shouldFailInvalidRate() throws Exception{
+
+    }
+
+    @Test
+    public void shouldFailInvalidBreweryId() throws Exception{
 
     }
 
