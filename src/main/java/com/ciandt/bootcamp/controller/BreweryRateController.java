@@ -7,11 +7,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
+@Tag(name = "Brewery Rate", description = "The Brewery Rate API")
 public class BreweryRateController {
 
-  @Autowired private BreweryService breweryService;
+  @Autowired
+  private BreweryService breweryService;
 
+  @Operation(summary = "Save the brewery rate")
   @PostMapping("/breweryRate")
   public void rateBrewery(@RequestBody RateBreweryRequest request) {
     breweryService.rateBrewery(request);
