@@ -1,4 +1,7 @@
-"# bootcamp"
+### Swagger docs
+
+http://localhost:8080/swagger.html
+
 
 ### Run using Docker
 
