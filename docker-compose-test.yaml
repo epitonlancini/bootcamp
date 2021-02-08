@@ -1,6 +1,18 @@
 version: "3"
 
 services:
+  demo:
+    container_name: bsh-demo
+    image: shiguemi/bsh-demo
+    depends_on:
+      - mongo
+    ports:
+      - 8080:8080
+    environment:
+      SPRING_APPLICATION_JSON: '{
+        "spring.data.mongodb.host": "mongo"
+      }'
+
   mongo-express:
     container_name: mongo-express
     image: mongo-express
